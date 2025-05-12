@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -89,15 +89,53 @@ const userStats = {
 };
 
 export default function MembersPage() {
+  const [users, setUsers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
-  // 검색 필터링된 사용자 목록
+  // API 연동
+  useEffect(() => {
+    async function fetchUsers() {
+      try {
+        const res = await fetch('https://tmc.kro.kr/api/v1/admin/users', {
+          headers: {
+            Authorization: `Bearer ${process.env.NEXT_PUBLIC_TOKEN}`,
+            // 필요시 'Content-Type': 'application/json' 등 추가
+          },
+        });
+        if (!res.ok) throw new Error('Failed to fetch');
+        const data = await res.json();
+
+        // 데이터 변환
+        const mapped = data.map((u: any) => ({
+          id: u.user_id,
+          name: u.name,
+          email: u.serial_id, // serial_id를 email로 사용
+          role: u.role,
+          status: u.is_login ? 'active' : 'inactive',
+          joinDate: u.created_at.slice(0, 10),
+          lastLogin: u.updated_at.slice(0, 10),
+          avatar: '/placeholder.svg?height=40&width=40',
+        }));
+        setUsers(mapped);
+      } catch (e) {
+        setUsers([]);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchUsers();
+  }, []);
+
+  // 검색 필터링
   const filteredUsers = users.filter(
-    (user) => user.name.toLowerCase().includes(searchTerm.toLowerCase()) || user.email.toLowerCase().includes(searchTerm.toLowerCase()),
+    (user) =>
+      user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleView = (user: any) => {
@@ -255,7 +293,7 @@ export default function MembersPage() {
                   <TableRow>
                     <TableHead>회원 정보</TableHead>
                     <TableHead>역할</TableHead>
-                    <TableHead>상태</TableHead>
+                    <TableHead>로그인 상태</TableHead>
                     <TableHead>가입일</TableHead>
                     <TableHead>최근 로그인</TableHead>
                     <TableHead className="text-right">관리</TableHead>
@@ -298,14 +336,14 @@ export default function MembersPage() {
                               <Eye className="mr-2 h-4 w-4" />
                               상세 정보 보기
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleEdit(user)}>
-                              <Edit className="mr-2 h-4 w-4" />
-                              정보 수정
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleDelete(user)}>
-                              <Trash2 className="mr-2 h-4 w-4" />
-                              회원 삭제
-                            </DropdownMenuItem>
+                            {/*<DropdownMenuItem onClick={() => handleEdit(user)}>*/}
+                            {/*  <Edit className="mr-2 h-4 w-4" />*/}
+                            {/*  정보 수정*/}
+                            {/*</DropdownMenuItem>*/}
+                            {/*<DropdownMenuItem onClick={() => handleDelete(user)}>*/}
+                            {/*  <Trash2 className="mr-2 h-4 w-4" />*/}
+                            {/*  회원 삭제*/}
+                            {/*</DropdownMenuItem>*/}
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>
@@ -351,7 +389,7 @@ export default function MembersPage() {
                   </p>
                 </div>
                 <div>
-                  <Label>상태</Label>
+                  <Label>로그인 상태</Label>
                   <p className="mt-1">
                     <Badge variant={selectedUser.status === 'active' ? 'success' : 'destructive'}>
                       {selectedUser.status === 'active' ? '활성' : '비활성'}
@@ -413,7 +451,7 @@ export default function MembersPage() {
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="status" className="text-right">
-                  상태
+                  로그인 상태
                 </Label>
                 <select
                   id="status"
