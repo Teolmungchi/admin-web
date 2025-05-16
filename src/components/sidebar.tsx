@@ -41,22 +41,24 @@ export function Sidebar() {
       href: '/dashboard',
       icon: <LayoutDashboard className="h-5 w-5" />,
     },
-    {
-      title: '사용자 및 권한 관리',
-      icon: <Users className="h-5 w-5" />,
-      submenu: [
-        {
-          title: '회원 목록 및 상세 정보',
-          href: '/dashboard/users/members',
-          icon: <UserCog className="h-4 w-4" />,
-        },
-        {
-          title: '관리자 역할/권한 관리',
-          href: '/dashboard/users/roles',
-          icon: <Shield className="h-4 w-4" />,
-        },
-      ],
-    },
+      {
+        title: '사용자 및 권한 관리',
+        href: '/dashboard/users/members',
+        icon: <UserCog className="h-4 w-4" />,
+      },
+      // submenu: [
+      //   {
+      //     title: '회원 목록 및 상세 정보',
+      //     href: '/dashboard/users/members',
+      //     icon: <UserCog className="h-4 w-4" />,
+      //   },
+        // {
+        //   title: '관리자 역할/권한 관리',
+        //   href: '/dashboard/users/roles',
+        //   icon: <Shield className="h-4 w-4" />,
+        // },
+      // ],
+    // },
     {
       title: '동물 데이터 관리',
       icon: <PawPrint className="h-5 w-5" />,
