@@ -23,10 +23,10 @@ export default function FaceRecognitionModelPage() {
     const fetchData = async () => {
       try {
         const [versionsRes, perfRes, animalRes, lightingRes] = await Promise.all([
-          fetch('http://localhost:8000/model-versions', { cache: 'no-store' }),
-          fetch('http://localhost:8000/performance', { cache: 'no-store' }),
-          fetch('http://localhost:8000/animal-performance', { cache: 'no-store' }),
-          fetch('http://localhost:8000/lighting-performance', { cache: 'no-store' }),
+          fetch('http://localhost:8000/face-recognition/model-versions', { cache: 'no-store' }),
+          fetch('http://localhost:8000/face-recognition/performance', { cache: 'no-store' }),
+          fetch('http://localhost:8000/face-recognition/animal-performance', { cache: 'no-store' }),
+          fetch('http://localhost:8000/face-recognition/lighting-performance', { cache: 'no-store' }),
         ]);
 
         if (!versionsRes.ok) throw new Error('모델 버전 데이터를 가져오는데 실패했습니다.');
@@ -55,7 +55,7 @@ export default function FaceRecognitionModelPage() {
     setDeployStatus('deploying');
     setError(null);
     try {
-      const response = await fetch('http://localhost:8000/deploy-model', {
+      const response = await fetch('http://localhost:8000/face-recognition/deploy-model', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -66,7 +66,7 @@ export default function FaceRecognitionModelPage() {
       if (!response.ok) throw new Error('모델 배포에 실패했습니다.');
 
       // 모델 목록 새로고침
-      const versionsRes = await fetch('http://localhost:8000/model-versions');
+      const versionsRes = await fetch('http://localhost:8000/face-recognition/model-versions');
       if (!versionsRes.ok) throw new Error('모델 버전 데이터를 가져오는데 실패했습니다.');
       const versionsData = await versionsRes.json();
       setModelVersions(versionsData.model_versions);
