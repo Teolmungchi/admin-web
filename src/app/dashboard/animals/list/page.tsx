@@ -385,10 +385,10 @@ export default function AnimalsListPage() {
           {selectedAnimal && (
             <div className="space-y-4 py-4">
               <div className="flex justify-center mb-4">
-                <Avatar className="h-40 w-40">
-                  <AvatarImage src={animal.image || '/placeholder.svg'} alt={animal.name} />
-                  <AvatarFallback>{animal.name.slice(0, 2)}</AvatarFallback>
-                </Avatar>
+                {/*<Avatar className="h-40 w-40">*/}
+                {/*  /!*<AvatarImage src={animal.image || '/placeholder.svg'} alt={animal.name} />*!/*/}
+                {/*  /!*<AvatarFallback>{animal.name.slice(0, 2)}</AvatarFallback>*!/*/}
+                {/*</Avatar>*/}
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
