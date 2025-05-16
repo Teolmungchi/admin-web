@@ -1,23 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import {
-  BarElement,
-  CategoryScale,
-  Chart as ChartJS,
-  Filler,
-  Legend,
-  LinearScale,
-  LineElement,
-  PointElement,
-  Tooltip,
-} from 'chart.js';
+import { BarElement, CategoryScale, Chart as ChartJS, Filler, Legend, LinearScale, LineElement, PointElement, Tooltip } from 'chart.js';
 import { Bar, Line } from 'react-chartjs-2';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Loader2 } from 'lucide-react';
-import DatePicker from 'react-date-picker';
-import 'react-date-picker/dist/DatePicker.css';
-import 'react-calendar/dist/Calendar.css';
+import { DateRange } from 'react-day-picker';
+import { DateRangePicker } from '@/components/ui/date-range-picker';
 
 ChartJS.register(LineElement, BarElement, PointElement, LinearScale, CategoryScale, Tooltip, Legend, Filler);
 
@@ -45,33 +34,17 @@ export function UserActivityChart() {
   const [data, setData] = useState<ChartData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [dateRange, setDateRange] = useState<{ startDate: string; endDate: string }>({
-    startDate: '2025-04-29',
-    endDate: '2025-05-05',
+  const [dateRange, setDateRange] = useState<DateRange | undefined>({
+    from: new Date(new Date().setDate(new Date().getDate() - 7)),
+    to: new Date(),
   });
 
-  const handleDateChange = (start: Date | null, end: Date | null) => {
-    if (start && end) {
-      setDateRange({
-        startDate: start.toISOString().split('T')[0],
-        endDate: end.toISOString().split('T')[0],
-      });
-    }
-  };
-
-  const fillMissingDates = (
-    activityData: any[],
-    dashboardData: DashboardData | null,
-    startDate: string,
-    endDate: string
-  ) => {
+  const fillMissingDates = (activityData: any[], dashboardData: DashboardData | null, startDate: Date, endDate: Date) => {
     const start = new Date(startDate);
     const end = new Date(endDate);
     const allDates: ChartData[] = [];
     const totalDays = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
-    const foundReportsPerDay = dashboardData?.foundReports
-      ? Math.round(dashboardData.foundReports / totalDays)
-      : 0;
+    const foundReportsPerDay = dashboardData?.foundReports ? Math.round(dashboardData.foundReports / totalDays) : 0;
 
     for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
       const dateStr = d.toISOString().split('T')[0];
@@ -84,11 +57,7 @@ export function UserActivityChart() {
         신규가입: found ? found.newUsers : 0,
         실종신고: found ? found.missingReports : 0,
         발견신고:
-          found && found.foundReports
-            ? found.foundReports
-            : isToday && dashboardData?.foundToday
-              ? dashboardData.foundToday
-              : foundReportsPerDay,
+          found && found.foundReports ? found.foundReports : isToday && dashboardData?.foundToday ? dashboardData.foundToday : foundReportsPerDay,
       });
     }
     return allDates;
@@ -96,19 +65,21 @@ export function UserActivityChart() {
 
   useEffect(() => {
     async function fetchActivityData() {
+      if (!dateRange?.from || !dateRange?.to) return;
+
       setLoading(true);
       setError(null);
       try {
+        const startDateStr = dateRange.from.toISOString().split('T')[0];
+        const endDateStr = dateRange.to.toISOString().split('T')[0];
+
         const [activityRes, dashboardRes] = await Promise.all([
-          fetch(
-            `https://tmc.kro.kr/api/v1/admin/activity?startDate=${dateRange.startDate}&endDate=${dateRange.endDate}`,
-            {
-              headers: {
-                Authorization: `Bearer ${process.env.NEXT_PUBLIC_TOKEN}`,
-                'Content-Type': 'application/json',
-              },
-            }
-          ),
+          fetch(`https://tmc.kro.kr/api/v1/admin/activity?startDate=${startDateStr}&endDate=${endDateStr}`, {
+            headers: {
+              Authorization: `Bearer ${process.env.NEXT_PUBLIC_TOKEN}`,
+              'Content-Type': 'application/json',
+            },
+          }),
           fetch('https://tmc.kro.kr/api/v1/admin/dashboard', {
             headers: {
               Authorization: `Bearer ${process.env.NEXT_PUBLIC_TOKEN}`,
@@ -124,7 +95,7 @@ export function UserActivityChart() {
         const activityData = await activityRes.json();
         const dashboardData = await dashboardRes.json();
 
-        const mappedData = fillMissingDates(activityData, dashboardData, dateRange.startDate, dateRange.endDate);
+        const mappedData = fillMissingDates(activityData, dashboardData, dateRange.from, dateRange.to);
         setData(mappedData);
       } catch (e) {
         setError('데이터를 불러오는 데 실패했습니다.');
@@ -133,6 +104,7 @@ export function UserActivityChart() {
         setLoading(false);
       }
     }
+
     fetchActivityData();
   }, [dateRange]);
 
@@ -209,32 +181,9 @@ export function UserActivityChart() {
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        {/*<h3 className="text-sm font-medium">최근 활동</h3>*/}
         <div className="flex gap-2 items-center">
           <div className="flex gap-2">
-            <DatePicker
-              onChange={(value: Date | Date[]) => {
-                if (!Array.isArray(value)) {
-                  handleDateChange(value, new Date(dateRange.endDate));
-                }
-              }}
-              value={new Date(dateRange.startDate)}
-              format="yyyy-MM-dd"
-              className="border rounded p-2 text-sm"
-              calendarClassName="border rounded shadow"
-            />
-            <span>-</span>
-            <DatePicker
-              onChange={(value: Date | Date[]) => {
-                if (!Array.isArray(value)) {
-                  handleDateChange(new Date(dateRange.startDate), value);
-                }
-              }}
-              value={new Date(dateRange.endDate)}
-              format="yyyy-MM-dd"
-              className="border rounded p-2 text-sm"
-              calendarClassName="border rounded shadow"
-            />
+            <DateRangePicker dateRange={dateRange} setDateRange={setDateRange} placeholder={'조회 기간'} className="w-full" />
           </div>
           <button
             onClick={() => setChartType('line')}
