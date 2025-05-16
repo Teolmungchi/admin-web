@@ -1,13 +1,15 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { BarElement, CategoryScale, Chart as ChartJS, Filler, Legend, LinearScale, LineElement, PointElement, Tooltip } from 'chart.js';
 import { Bar, Line } from 'react-chartjs-2';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Loader2 } from 'lucide-react';
+import DatePicker from 'react-date-picker';
+import 'react-date-picker/dist/DatePicker.css';
+import 'react-calendar/dist/Calendar.css';
 
-// Chart.js 등록
 ChartJS.register(LineElement, BarElement, PointElement, LinearScale, CategoryScale, Tooltip, Legend, Filler);
 
-// 차트 데이터 타입 정의
 type ChartData = {
   name: string;
   활성사용자: number;
@@ -18,19 +20,69 @@ type ChartData = {
 
 export function UserActivityChart() {
   const [chartType, setChartType] = useState<'line' | 'area' | 'bar'>('area');
+  const [data, setData] = useState<ChartData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [dateRange, setDateRange] = useState<{ startDate: string; endDate: string }>({
+    startDate: '2025-04-29',
+    endDate: '2025-05-05',
+  });
 
-  // 샘플 데이터
-  const data: ChartData[] = [
-    { name: '4/19', 활성사용자: 420, 신규가입: 45, 실종신고: 12, 발견신고: 8 },
-    { name: '4/20', 활성사용자: 380, 신규가입: 32, 실종신고: 10, 발견신고: 5 },
-    { name: '4/21', 활성사용자: 450, 신규가입: 38, 실종신고: 15, 발견신고: 9 },
-    { name: '4/22', 활성사용자: 410, 신규가입: 42, 실종신고: 18, 발견신고: 11 },
-    { name: '4/23', 활성사용자: 520, 신규가입: 50, 실종신고: 22, 발견신고: 14 },
-    { name: '4/24', 활성사용자: 580, 신규가입: 65, 실종신고: 25, 발견신고: 16 },
-    { name: '4/25', 활성사용자: 490, 신규가입: 48, 실종신고: 20, 발견신고: 12 },
-  ];
+  const handleDateChange = (start: Date | null, end: Date | null) => {
+    if (start && end) {
+      setDateRange({
+        startDate: start.toISOString().split('T')[0],
+        endDate: end.toISOString().split('T')[0],
+      });
+    }
+  };
 
-  // 차트 색상 설정
+  const fillMissingDates = (apiData: any[], startDate: string, endDate: string) => {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const allDates: ChartData[] = [];
+    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+      const dateStr = d.toISOString().split('T')[0];
+      const found = apiData.find((item) => item.date.startsWith(dateStr));
+      allDates.push({
+        name: d.toLocaleDateString('ko-KR', { month: 'numeric', day: 'numeric' }),
+        활성사용자: found ? found.activeUsers : 0,
+        신규가입: found ? found.newUsers : 0,
+        실종신고: found ? found.missingReports : 0,
+        발견신고: found ? found.foundReports : 0,
+      });
+    }
+    return allDates;
+  };
+
+  useEffect(() => {
+    async function fetchActivityData() {
+      setLoading(true);
+      setError(null);
+      try {
+        const res = await fetch(
+          `https://tmc.kro.kr/api/v1/admin/activity?startDate=${dateRange.startDate}&endDate=${dateRange.endDate}`,
+          {
+            headers: {
+              Authorization: `Bearer ${process.env.NEXT_PUBLIC_TOKEN}`,
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+        if (!res.ok) throw new Error('Failed to fetch');
+        const apiData = await res.json();
+        const mappedData = fillMissingDates(apiData, dateRange.startDate, dateRange.endDate);
+        setData(mappedData);
+      } catch (e) {
+        setError('데이터를 불러오는 데 실패했습니다.');
+        setData([]);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchActivityData();
+  }, [dateRange]);
+
   const colors = {
     활성사용자: '#8884d8',
     신규가입: '#82ca9d',
@@ -38,22 +90,20 @@ export function UserActivityChart() {
     발견신고: '#ff8042',
   };
 
-  // 공통 Chart.js 데이터 구조
   const chartData = (keys: (keyof ChartData)[]) => ({
     labels: data.map((item) => item.name),
     datasets: keys.map((key) => ({
       label: key,
       data: data.map((item) => item[key]),
-      backgroundColor: chartType === 'area' ? `${colors[key]}80` : colors[key], // 영역 차트는 투명도 적용
+      backgroundColor: chartType === 'area' ? `${colors[key]}80` : colors[key],
       borderColor: colors[key],
       borderWidth: 2,
-      fill: chartType === 'area', // 영역 차트일 때만 fill 활성화
+      fill: chartType === 'area',
       pointRadius: chartType === 'line' ? 3 : 0,
-      tension: chartType === 'line' ? 0.4 : 0, // 라인 차트 곡선
+      tension: chartType === 'line' ? 0.4 : 0,
     })),
   });
 
-  // Chart.js 옵션
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
@@ -91,11 +141,48 @@ export function UserActivityChart() {
     },
   };
 
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-[250px]">
+        <Loader2 className="h-6 w-6 animate-spin" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return <div className="text-red-500 text-center h-[250px] flex items-center justify-center">{error}</div>;
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h3 className="text-sm font-medium">최근 7일간 활동</h3>
-        <div className="flex gap-2">
+        <h3 className="text-sm font-medium">최근 활동</h3>
+        <div className="flex gap-2 items-center">
+          <div className="flex gap-2">
+            <DatePicker
+              onChange={(value: Date | Date[]) => {
+                if (!Array.isArray(value)) {
+                  handleDateChange(value, new Date(dateRange.endDate));
+                }
+              }}
+              value={new Date(dateRange.startDate)}
+              format="yyyy-MM-dd"
+              className="border rounded p-2 text-sm"
+              calendarClassName="border rounded shadow"
+            />
+            <span>-</span>
+            <DatePicker
+              onChange={(value: Date | Date[]) => {
+                if (!Array.isArray(value)) {
+                  handleDateChange(new Date(dateRange.startDate), value);
+                }
+              }}
+              value={new Date(dateRange.endDate)}
+              format="yyyy-MM-dd"
+              className="border rounded p-2 text-sm"
+              calendarClassName="border rounded shadow"
+            />
+          </div>
           <button
             onClick={() => setChartType('line')}
             className={`px-2 py-1 text-xs rounded ${
