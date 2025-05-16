@@ -102,7 +102,7 @@ export function DashboardStats() {
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">매칭 성공률</CardTitle>
+          <CardTitle className="text-sm font-medium">발견률</CardTitle>
           <Brain className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>

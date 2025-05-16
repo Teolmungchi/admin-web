@@ -1,140 +1,43 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Calendar, Download, Eye, Filter, Search } from 'lucide-react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Progress } from '@/components/ui/progress'; // 샘플 매칭 이력 데이터
+import { Progress } from '@/components/ui/progress';
 
-// 샘플 매칭 이력 데이터
-const matchingHistory = [
-  {
-    id: '1',
-    date: '2023-04-25',
-    time: '14:32:45',
-    missingAnimal: {
-      id: 'm1',
-      name: '초코',
-      type: '고양이',
-      breed: '코리안 숏헤어',
-      image: '/placeholder.svg?height=40&width=40',
-      owner: '김철수',
-    },
-    foundAnimal: {
-      id: 'f1',
-      type: '고양이',
-      breed: '코리안 숏헤어',
-      image: '/placeholder.svg?height=40&width=40',
-      finder: '박지민',
-    },
-    similarity: 92,
-    status: 'matched',
-    matchType: 'auto',
-  },
-  {
-    id: '2',
-    date: '2023-04-24',
-    time: '10:15:22',
-    missingAnimal: {
-      id: 'm2',
-      name: '몽이',
-      type: '강아지',
-      breed: '말티즈',
-      image: '/placeholder.svg?height=40&width=40',
-      owner: '이영희',
-    },
-    foundAnimal: {
-      id: 'f2',
-      type: '강아지',
-      breed: '말티즈',
-      image: '/placeholder.svg?height=40&width=40',
-      finder: '최유진',
-    },
-    similarity: 88,
-    status: 'matched',
-    matchType: 'auto',
-  },
-  {
-    id: '3',
-    date: '2023-04-23',
-    time: '16:45:10',
-    missingAnimal: {
-      id: 'm3',
-      name: '나비',
-      type: '고양이',
-      breed: '페르시안',
-      image: '/placeholder.svg?height=40&width=40',
-      owner: '박지민',
-    },
-    foundAnimal: {
-      id: 'f3',
-      type: '고양이',
-      breed: '페르시안 믹스',
-      image: '/placeholder.svg?height=40&width=40',
-      finder: '정민수',
-    },
-    similarity: 78,
-    status: 'rejected',
-    matchType: 'auto',
-  },
-  {
-    id: '4',
-    date: '2023-04-22',
-    time: '09:20:33',
-    missingAnimal: {
-      id: 'm4',
-      name: '루시',
-      type: '고양이',
-      breed: '러시안 블루',
-      image: '/placeholder.svg?height=40&width=40',
-      owner: '최유진',
-    },
-    foundAnimal: {
-      id: 'f4',
-      type: '고양이',
-      breed: '러시안 블루',
-      image: '/placeholder.svg?height=40&width=40',
-      finder: '김철수',
-    },
-    similarity: 95,
-    status: 'matched',
-    matchType: 'manual',
-  },
-  {
-    id: '5',
-    date: '2023-04-21',
-    time: '13:10:05',
-    missingAnimal: {
-      id: 'm5',
-      name: '해피',
-      type: '강아지',
-      breed: '골든 리트리버',
-      image: '/placeholder.svg?height=40&width=40',
-      owner: '정민수',
-    },
-    foundAnimal: {
-      id: 'f5',
-      type: '강아지',
-      breed: '래브라도 리트리버',
-      image: '/placeholder.svg?height=40&width=40',
-      finder: '이영희',
-    },
-    similarity: 65,
-    status: 'pending',
-    matchType: 'auto',
-  },
-];
+// 매칭 이력 타입
+type MatchingHistoryItem = {
+  id: string;
+  date: string;
+  time: string;
+  missingAnimal: {
+    id: string;
+    name: string;
+    type: string;
+    breed: string;
+    owner: string;
+  };
+  foundAnimal: {
+    id: string;
+    type: string;
+    breed: string;
+    finder: string;
+  };
+  similarity: number;
+  status: string;
+  matchType: string;
+};
 
 // 매칭 상세 정보 타입
 type MatchingDetail = {
   id: string;
   missingAnimal: {
-    image: string;
     name: string;
     type: string;
     breed: string;
@@ -148,7 +51,6 @@ type MatchingDetail = {
     location?: string;
   };
   foundAnimal: {
-    image: string;
     type: string;
     breed: string;
     color?: string;
@@ -171,59 +73,138 @@ type MatchingDetail = {
   time: string;
 };
 
-// 샘플 매칭 상세 정보
-const matchingDetails: Record<string, MatchingDetail> = {
-  '1': {
-    id: '1',
-    missingAnimal: {
-      image: '/placeholder.svg?height=200&width=200',
-      name: '초코',
-      type: '고양이',
-      breed: '코리안 숏헤어',
-      color: '검정/흰색',
-      gender: '수컷',
-      age: '3세',
-      features: ['목에 빨간 목줄', '왼쪽 귀에 작은 흠집', '흰색 발'],
-      owner: '김철수',
-      contact: '010-1234-5678',
-      reportDate: '2023-04-20',
-      location: '서울시 강남구',
-    },
-    foundAnimal: {
-      image: '/placeholder.svg?height=200&width=200',
-      type: '고양이',
-      breed: '코리안 숏헤어',
-      color: '검정/흰색',
-      gender: '수컷',
-      age: '3-4세 추정',
-      features: ['목줄 없음', '왼쪽 귀에 흠집', '흰색 발'],
-      finder: '박지민',
-      contact: '010-3456-7890',
-      foundDate: '2023-04-24',
-      location: '서울시 강남구 인근',
-    },
-    similarity: 92,
-    matchingPoints: [
-      { feature: '품종', score: 100 },
-      { feature: '색상', score: 95 },
-      { feature: '체형', score: 90 },
-      { feature: '특징', score: 85 },
-      { feature: '위치', score: 90 },
-    ],
-    status: 'matched',
-    matchType: 'auto',
-    date: '2023-04-25',
-    time: '14:32:45',
-  },
-  // 다른 상세 정보들...
-};
-
 export default function MatchingHistoryPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [selectedMatch, setSelectedMatch] = useState<string | null>(null);
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
+  const [matchingHistory, setMatchingHistory] = useState<MatchingHistoryItem[]>([]);
+  const [matchingDetails, setMatchingDetails] = useState<Record<string, MatchingDetail>>({});
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // API 데이터 가져오기
+  const fetchMatchingHistory = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch('https://tmc.kro.kr/api/v1/admin/all', {
+        headers: {
+          Authorization: `Bearer ${process.env.NEXT_PUBLIC_TOKEN}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!res.ok) throw new Error(`매칭 이력을 불러오지 못했습니다: ${res.status}`);
+
+      const { httpStatus, success, data } = await res.json();
+
+      if (httpStatus !== 200 || !success) {
+        throw new Error('API 응답이 실패했습니다');
+      }
+
+      // feeds와 matchingResults를 매칭 이력으로 변환
+      const history: MatchingHistoryItem[] = [];
+      const details: Record<string, MatchingDetail> = {};
+
+      data.feeds.forEach((feed: any) => {
+        if (feed.matchingResults && feed.matchingResults.length > 0) {
+          feed.matchingResults.forEach((result: any) => {
+            const createdAt = new Date(result.createdAt);
+            const date = createdAt.toISOString().split('T')[0];
+            const time = createdAt.toTimeString().split(' ')[0];
+            const matchId = `${feed.id}-${result.id}`;
+
+            const historyItem: MatchingHistoryItem = {
+              id: matchId,
+              date,
+              time,
+              missingAnimal: {
+                id: feed.id.toString(),
+                name: feed.title,
+                type: ['샴', '페르시안', '코리안 숏헤어', '러시안 블루'].includes(feed.dogType)
+                  ? '고양이'
+                  : '강아지',
+                breed: feed.dogType,
+                owner: feed.author.name,
+              },
+              foundAnimal: {
+                id: result.id.toString(),
+                type: ['샴', '페르시안', '코리안 숏헤어', '러시안 블루'].includes(feed.dogType)
+                  ? '고양이'
+                  : '강아지',
+                breed: feed.dogType, // 발견 동물의 품종은 가정
+                finder: '알 수 없음', // API에 발견자 정보 없음
+              },
+              similarity: result.similarity,
+              status: result.status === 'FOUND' ? 'matched' : 'rejected',
+              matchType: 'auto', // API에 매칭 유형 정보 없음, 기본값
+            };
+
+            const detailItem: MatchingDetail = {
+              id: matchId,
+              missingAnimal: {
+                name: feed.title,
+                type: ['샴', '페르시안', '코리안 숏헤어', '러시안 블루'].includes(feed.dogType)
+                  ? '고양이'
+                  : '강아지',
+                breed: feed.dogType,
+                color: feed.dogColor,
+                gender: feed.dogGender === '남' || feed.dogGender === '남자' ? '수컷' : feed.dogGender === '여' || feed.dogGender === '여자' ? '암컷' : '미상',
+                age: feed.dogAge ? `${feed.dogAge}세` : '알 수 없음',
+                features: feed.dogFeature ? [feed.dogFeature] : [],
+                owner: feed.author.name,
+                contact: feed.author.serialId, // 이메일을 연락처로 사용
+                reportDate: feed.lostDate,
+                location: feed.lostPlace,
+              },
+              foundAnimal: {
+                type: ['샴', '페르시안', '코리안 숏헤어', '러시안 블루'].includes(feed.dogType)
+                  ? '고양이'
+                  : '강아지',
+                breed: feed.dogType, // 발견 동물의 품종은 가정
+                color: feed.dogColor, // 동일 색상 가정
+                gender: feed.dogGender === '남' || feed.dogGender === '남자' ? '수컷' : feed.dogGender === '여' || feed.dogGender === '여자' ? '암컷' : '미상',
+                age: feed.dogAge ? `${feed.dogAge}세` : '알 수 없음', // 동일 나이 가정
+                features: feed.dogFeature ? [feed.dogFeature] : [],
+                finder: '알 수 없음', // 발견자 정보 없음
+                contact: '알 수 없음',
+                foundDate: date, // 매칭 결과 생성일을 발견일로 사용
+                location: feed.lostPlace, // 동일 위치 가정
+              },
+              similarity: result.similarity,
+              matchingPoints: [
+                { feature: '품종', score: Math.min(result.similarity + 10, 100) },
+                { feature: '색상', score: result.similarity },
+                { feature: '체형', score: Math.max(result.similarity - 10, 0) },
+                { feature: '특징', score: result.similarity },
+                { feature: '위치', score: Math.min(result.similarity + 5, 100) },
+              ],
+              status: result.status === 'FOUND' ? 'matched' : 'rejected',
+              matchType: 'auto',
+              date,
+              time,
+            };
+
+            history.push(historyItem);
+            details[matchId] = detailItem;
+          });
+        }
+      });
+
+      setMatchingHistory(history);
+      setMatchingDetails(details);
+    } catch (e) {
+      setError('매칭 이력을 불러오는 데 실패했습니다: ' + (e as Error).message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 초기 데이터 로드
+  useEffect(() => {
+    fetchMatchingHistory();
+  }, []);
 
   // 검색 및 필터링된 매칭 이력
   const filteredHistory = matchingHistory.filter((match) => {
@@ -244,8 +225,19 @@ export default function MatchingHistoryPage() {
     setIsDetailDialogOpen(true);
   };
 
+  if (loading) {
+    return <div className="flex justify-center items-center h-screen">로딩 중...</div>;
+  }
+
   return (
     <div className="space-y-6">
+      {error && (
+        <Alert variant="destructive">
+          <AlertTitle>오류</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">AI 유사도 매칭 결과 이력</h1>
@@ -308,27 +300,15 @@ export default function MatchingHistoryPage() {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <div className="flex items-center space-x-2">
-                      <Avatar className="h-8 w-8">
-                        <AvatarImage src={match.missingAnimal.image || '/placeholder.svg'} alt={match.missingAnimal.name} />
-                        <AvatarFallback>{match.missingAnimal.name.slice(0, 2)}</AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <p className="font-medium">{match.missingAnimal.name}</p>
-                        <p className="text-xs text-muted-foreground">{match.missingAnimal.breed}</p>
-                      </div>
+                    <div>
+                      <p className="font-medium">{match.missingAnimal.name}</p>
+                      <p className="text-xs text-muted-foreground">{match.missingAnimal.breed}</p>
                     </div>
                   </TableCell>
                   <TableCell>
-                    <div className="flex items-center space-x-2">
-                      <Avatar className="h-8 w-8">
-                        <AvatarImage src={match.foundAnimal.image || '/placeholder.svg'} alt={match.foundAnimal.type} />
-                        <AvatarFallback>{match.foundAnimal.type.slice(0, 2)}</AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <p className="font-medium">{match.foundAnimal.type}</p>
-                        <p className="text-xs text-muted-foreground">{match.foundAnimal.breed}</p>
-                      </div>
+                    <div>
+                      <p className="font-medium">{match.foundAnimal.type}</p>
+                      <p className="text-xs text-muted-foreground">{match.foundAnimal.breed}</p>
                     </div>
                   </TableCell>
                   <TableCell>
@@ -394,15 +374,6 @@ export default function MatchingHistoryPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-4">
                   <h3 className="font-semibold text-lg">실종 동물</h3>
-                  <div className="flex justify-center">
-                    <Avatar className="h-40 w-40">
-                      <AvatarImage
-                        src={matchingDetails[selectedMatch].missingAnimal.image || '/placeholder.svg'}
-                        alt={matchingDetails[selectedMatch].missingAnimal.name}
-                      />
-                      <AvatarFallback>{matchingDetails[selectedMatch].missingAnimal.name.slice(0, 2)}</AvatarFallback>
-                    </Avatar>
-                  </div>
                   <div className="space-y-2">
                     <div className="grid grid-cols-2 gap-2">
                       <div>
@@ -433,7 +404,9 @@ export default function MatchingHistoryPage() {
                     <div>
                       <p className="text-sm text-muted-foreground">특징</p>
                       <ul className="list-disc pl-5">
-                        {matchingDetails[selectedMatch].missingAnimal.features?.map((feature, index) => <li key={index}>{feature}</li>)}
+                        {matchingDetails[selectedMatch].missingAnimal.features?.map((feature, index) => (
+                          <li key={index}>{feature}</li>
+                        ))}
                       </ul>
                     </div>
                     <div>
@@ -457,15 +430,6 @@ export default function MatchingHistoryPage() {
 
                 <div className="space-y-4">
                   <h3 className="font-semibold text-lg">발견 동물</h3>
-                  <div className="flex justify-center">
-                    <Avatar className="h-40 w-40">
-                      <AvatarImage
-                        src={matchingDetails[selectedMatch].foundAnimal.image || '/placeholder.svg'}
-                        alt={matchingDetails[selectedMatch].foundAnimal.type}
-                      />
-                      <AvatarFallback>{matchingDetails[selectedMatch].foundAnimal.type.slice(0, 2)}</AvatarFallback>
-                    </Avatar>
-                  </div>
                   <div className="space-y-2">
                     <div className="grid grid-cols-2 gap-2">
                       <div>
@@ -492,7 +456,9 @@ export default function MatchingHistoryPage() {
                     <div>
                       <p className="text-sm text-muted-foreground">특징</p>
                       <ul className="list-disc pl-5">
-                        {matchingDetails[selectedMatch].foundAnimal.features?.map((feature, index) => <li key={index}>{feature}</li>)}
+                        {matchingDetails[selectedMatch].foundAnimal.features?.map((feature, index) => (
+                          <li key={index}>{feature}</li>
+                        ))}
                       </ul>
                     </div>
                     <div>
@@ -520,20 +486,6 @@ export default function MatchingHistoryPage() {
                 <div className="flex items-center space-x-4">
                   <div className="text-3xl font-bold">{matchingDetails[selectedMatch].similarity}%</div>
                   <Progress value={matchingDetails[selectedMatch].similarity} className="flex-1" />
-                </div>
-                <div className="space-y-2">
-                  <p className="font-medium">매칭 포인트 분석</p>
-                  <div className="grid grid-cols-2 gap-4">
-                    {matchingDetails[selectedMatch].matchingPoints?.map((point, index) => (
-                      <div key={index} className="flex justify-between items-center">
-                        <span>{point.feature}</span>
-                        <div className="flex items-center space-x-2">
-                          <Progress value={point.score} className="w-[100px]" />
-                          <span className="text-sm">{point.score}%</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
                 </div>
               </div>
             </div>
