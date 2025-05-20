@@ -59,7 +59,6 @@ export default function UserMonitoringPage() {
                     <Tooltip />
                     <Bar dataKey="신규가입" fill="#8884d8" />
                     <Bar dataKey="활성사용자" fill="#82ca9d" />
-                    fill="#8884d8" />
                     <Bar dataKey="활성사용자" fill="#82ca9d" />
                   </BarChart>
                 </ResponsiveContainer>

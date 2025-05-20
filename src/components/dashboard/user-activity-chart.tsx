@@ -1,21 +1,38 @@
 'use client';
+
 import { useEffect, useState } from 'react';
 import { BarElement, CategoryScale, Chart as ChartJS, Filler, Legend, LinearScale, LineElement, PointElement, Tooltip } from 'chart.js';
 import { Bar, Line } from 'react-chartjs-2';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Loader2 } from 'lucide-react';
-import DatePicker from 'react-date-picker';
-import 'react-date-picker/dist/DatePicker.css';
-import 'react-calendar/dist/Calendar.css';
+import { DateRange } from 'react-day-picker';
+import { DateRangePicker } from '@/components/ui/date-range-picker';
 
 ChartJS.register(LineElement, BarElement, PointElement, LinearScale, CategoryScale, Tooltip, Legend, Filler);
 
+const colors = {
+  활성사용자: '#8884d8',
+  신규가입: '#82ca9d',
+  실종신고: '#ffc658',
+  발견신고: '#ff8042',
+} as const;
+
+type ChartKey = keyof typeof colors;
 type ChartData = {
   name: string;
-  활성사용자: number;
-  신규가입: number;
-  실종신고: number;
-  발견신고: number;
+} & Record<ChartKey, number>;
+
+
+
+type DashboardData = {
+  totalUsers: number;
+  missingReports: number;
+  foundReports: number;
+  matchingSuccessRate: number;
+  usersChange: number;
+  missingToday: number;
+  foundToday: number;
+  matchingChange: number;
 };
 
 export function UserActivityChart() {
@@ -23,33 +40,30 @@ export function UserActivityChart() {
   const [data, setData] = useState<ChartData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [dateRange, setDateRange] = useState<{ startDate: string; endDate: string }>({
-    startDate: '2025-04-29',
-    endDate: '2025-05-05',
+  const [dateRange, setDateRange] = useState<DateRange | undefined>({
+    from: new Date(new Date().setDate(new Date().getDate() - 7)),
+    to: new Date(),
   });
 
-  const handleDateChange = (start: Date | null, end: Date | null) => {
-    if (start && end) {
-      setDateRange({
-        startDate: start.toISOString().split('T')[0],
-        endDate: end.toISOString().split('T')[0],
-      });
-    }
-  };
-
-  const fillMissingDates = (apiData: any[], startDate: string, endDate: string) => {
+  const fillMissingDates = (activityData: any[], dashboardData: DashboardData | null, startDate: Date, endDate: Date) => {
     const start = new Date(startDate);
     const end = new Date(endDate);
     const allDates: ChartData[] = [];
+    const totalDays = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+    const foundReportsPerDay = dashboardData?.foundReports ? Math.round(dashboardData.foundReports / totalDays) : 0;
+
     for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
       const dateStr = d.toISOString().split('T')[0];
-      const found = apiData.find((item) => item.date.startsWith(dateStr));
+      const found = activityData.find((item) => item.date.startsWith(dateStr));
+      const isToday = dateStr === new Date().toISOString().split('T')[0];
+
       allDates.push({
         name: d.toLocaleDateString('ko-KR', { month: 'numeric', day: 'numeric' }),
         활성사용자: found ? found.activeUsers : 0,
         신규가입: found ? found.newUsers : 0,
         실종신고: found ? found.missingReports : 0,
-        발견신고: found ? found.foundReports : 0,
+        발견신고:
+          found && found.foundReports ? found.foundReports : isToday && dashboardData?.foundToday ? dashboardData.foundToday : foundReportsPerDay,
       });
     }
     return allDates;
@@ -57,21 +71,37 @@ export function UserActivityChart() {
 
   useEffect(() => {
     async function fetchActivityData() {
+      if (!dateRange?.from || !dateRange?.to) return;
+
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch(
-          `https://tmc.kro.kr/api/v1/admin/activity?startDate=${dateRange.startDate}&endDate=${dateRange.endDate}`,
-          {
+        const startDateStr = dateRange.from.toISOString().split('T')[0];
+        const endDateStr = dateRange.to.toISOString().split('T')[0];
+
+        const [activityRes, dashboardRes] = await Promise.all([
+          fetch(`https://tmc.kro.kr/api/v1/admin/activity?startDate=${startDateStr}&endDate=${endDateStr}`, {
             headers: {
               Authorization: `Bearer ${process.env.NEXT_PUBLIC_TOKEN}`,
               'Content-Type': 'application/json',
             },
-          }
-        );
-        if (!res.ok) throw new Error('Failed to fetch');
-        const apiData = await res.json();
-        const mappedData = fillMissingDates(apiData, dateRange.startDate, dateRange.endDate);
+          }),
+          fetch('https://tmc.kro.kr/api/v1/admin/dashboard', {
+            headers: {
+              Authorization: `Bearer ${process.env.NEXT_PUBLIC_TOKEN}`,
+              'Content-Type': 'application/json',
+            },
+          }),
+        ]);
+
+        if (!activityRes.ok || !dashboardRes.ok) {
+          throw new Error('Failed to fetch data');
+        }
+
+        const activityData = await activityRes.json();
+        const dashboardData = await dashboardRes.json();
+
+        const mappedData = fillMissingDates(activityData, dashboardData, dateRange.from, dateRange.to);
         setData(mappedData);
       } catch (e) {
         setError('데이터를 불러오는 데 실패했습니다.');
@@ -80,17 +110,12 @@ export function UserActivityChart() {
         setLoading(false);
       }
     }
+
     fetchActivityData();
   }, [dateRange]);
 
-  const colors = {
-    활성사용자: '#8884d8',
-    신규가입: '#82ca9d',
-    실종신고: '#ffc658',
-    발견신고: '#ff8042',
-  };
 
-  const chartData = (keys: (keyof ChartData)[]) => ({
+  const chartData = (keys: ChartKey[]) => ({
     labels: data.map((item) => item.name),
     datasets: keys.map((key) => ({
       label: key,
@@ -102,7 +127,7 @@ export function UserActivityChart() {
       pointRadius: chartType === 'line' ? 3 : 0,
       tension: chartType === 'line' ? 0.4 : 0,
     })),
-  });
+  });;
 
   const chartOptions = {
     responsive: true,
@@ -156,32 +181,9 @@ export function UserActivityChart() {
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h3 className="text-sm font-medium">최근 활동</h3>
         <div className="flex gap-2 items-center">
           <div className="flex gap-2">
-            <DatePicker
-              onChange={(value: Date | Date[]) => {
-                if (!Array.isArray(value)) {
-                  handleDateChange(value, new Date(dateRange.endDate));
-                }
-              }}
-              value={new Date(dateRange.startDate)}
-              format="yyyy-MM-dd"
-              className="border rounded p-2 text-sm"
-              calendarClassName="border rounded shadow"
-            />
-            <span>-</span>
-            <DatePicker
-              onChange={(value: Date | Date[]) => {
-                if (!Array.isArray(value)) {
-                  handleDateChange(new Date(dateRange.startDate), value);
-                }
-              }}
-              value={new Date(dateRange.endDate)}
-              format="yyyy-MM-dd"
-              className="border rounded p-2 text-sm"
-              calendarClassName="border rounded shadow"
-            />
+            <DateRangePicker dateRange={dateRange} setDateRange={setDateRange} placeholder={'조회 기간'} className="w-full" />
           </div>
           <button
             onClick={() => setChartType('line')}

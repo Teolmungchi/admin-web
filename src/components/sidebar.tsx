@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { signOut } from 'next-auth/react';
 import { cn } from '@/lib/utils';
-import { Brain, ChevronDown, Database, Eye, History, Info, LayoutDashboard, LogOut, PawPrint, Settings, Shield, UserCog, Users } from 'lucide-react';
+import { BarChart, Brain, ChevronDown, Database, History, LayoutDashboard, LogOut, PawPrint, Settings, UserCog } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 type SidebarItem = {
@@ -41,23 +41,23 @@ export function Sidebar() {
       href: '/dashboard',
       icon: <LayoutDashboard className="h-5 w-5" />,
     },
-      {
-        title: '사용자 및 권한 관리',
-        href: '/dashboard/users/members',
-        icon: <UserCog className="h-4 w-4" />,
-      },
-      // submenu: [
-      //   {
-      //     title: '회원 목록 및 상세 정보',
-      //     href: '/dashboard/users/members',
-      //     icon: <UserCog className="h-4 w-4" />,
-      //   },
-        // {
-        //   title: '관리자 역할/권한 관리',
-        //   href: '/dashboard/users/roles',
-        //   icon: <Shield className="h-4 w-4" />,
-        // },
-      // ],
+    {
+      title: '사용자 및 권한 관리',
+      href: '/dashboard/users/members',
+      icon: <UserCog className="h-4 w-4" />,
+    },
+    // submenu: [
+    //   {
+    //     title: '회원 목록 및 상세 정보',
+    //     href: '/dashboard/users/members',
+    //     icon: <UserCog className="h-4 w-4" />,
+    //   },
+    // {
+    //   title: '관리자 역할/권한 관리',
+    //   href: '/dashboard/users/roles',
+    //   icon: <Shield className="h-4 w-4" />,
+    // },
+    // ],
     // },
     {
       title: '동물 데이터 관리',
@@ -81,23 +81,18 @@ export function Sidebar() {
       submenu: [
         {
           title: '유사도 추출 모델 관리',
-          href: '/dashboard/ai/model-version',
+          href: '/dashboard/v2/ai/model-info',
           icon: <Database className="h-4 w-4" />,
         },
         {
-          title: '얼굴인식 모델 관리',
-          href: '/dashboard/ai/face-recognition',
-          icon: <Eye className="h-4 w-4" />,
+          title: '유사도 추출 모델 학습',
+          href: '/dashboard/v2/ai/model-training',
+          icon: <BarChart className="h-4 w-4" />,
         },
         {
-          title: '설정/파라미터 관리',
-          href: '/dashboard/ai/parameters',
+          title: '설정 / 파라미터 관리',
+          href: '/dashboard/v2/ai/parameter-setting',
           icon: <Settings className="h-4 w-4" />,
-        },
-        {
-          title: '현재 모델 버전 정보',
-          href: '/dashboard/ai/current-version',
-          icon: <Info className="h-4 w-4" />,
         },
       ],
     },

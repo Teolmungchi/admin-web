@@ -11,22 +11,32 @@ import { Cat, CheckCircle2, Clock, Dog } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 export default function FaceRecognitionModelPage() {
-  const [modelVersions, setModelVersions] = useState([]);
+  const [modelVersions, setModelVersions] = useState<ModelVersion[]>([]);
   const [performanceData, setPerformanceData] = useState([]);
   const [animalPerformanceData, setAnimalPerformanceData] = useState([]);
   const [lightingPerformanceData, setLightingPerformanceData] = useState([]);
-  const [deployStatus, setDeployStatus] = useState(null);
-  const [error, setError] = useState(null);
+  const [deployStatus, setDeployStatus] = useState<null | "deploying" | "success" | "error">(null);
+  const [error, setError] = useState<null | string>(null);
+
+  interface ModelVersion {
+    id: number;
+    name: string;
+    status: string;
+    date: string;
+    accuracy: number;
+    supportedAnimals: string[];
+  }
+
 
   // 데이터 가져오기
   useEffect(() => {
     const fetchData = async () => {
       try {
         const [versionsRes, perfRes, animalRes, lightingRes] = await Promise.all([
-          fetch('http://localhost:8000/model-versions', { cache: 'no-store' }),
-          fetch('http://localhost:8000/performance', { cache: 'no-store' }),
-          fetch('http://localhost:8000/animal-performance', { cache: 'no-store' }),
-          fetch('http://localhost:8000/lighting-performance', { cache: 'no-store' }),
+          fetch('http://localhost:8000/face-recognition/model-versions', { cache: 'no-store' }),
+          fetch('http://localhost:8000/face-recognition/performance', { cache: 'no-store' }),
+          fetch('http://localhost:8000/face-recognition/animal-performance', { cache: 'no-store' }),
+          fetch('http://localhost:8000/face-recognition/lighting-performance', { cache: 'no-store' }),
         ]);
 
         if (!versionsRes.ok) throw new Error('모델 버전 데이터를 가져오는데 실패했습니다.');
@@ -44,18 +54,22 @@ export default function FaceRecognitionModelPage() {
         setAnimalPerformanceData(animalData.animal_performance_data);
         setLightingPerformanceData(lightingData.lighting_performance_data);
       } catch (err) {
-        setError(err.message);
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError(String(err));
+        }
       }
     };
     fetchData();
   }, []);
 
   // 모델 배포
-  const handleDeploy = async (versionId) => {
+  const handleDeploy = async (versionId : number) => {
     setDeployStatus('deploying');
     setError(null);
     try {
-      const response = await fetch('http://localhost:8000/deploy-model', {
+      const response = await fetch('http://localhost:8000/face-recognition/deploy-model', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -66,7 +80,7 @@ export default function FaceRecognitionModelPage() {
       if (!response.ok) throw new Error('모델 배포에 실패했습니다.');
 
       // 모델 목록 새로고침
-      const versionsRes = await fetch('http://localhost:8000/model-versions');
+      const versionsRes = await fetch('http://localhost:8000/face-recognition/model-versions');
       if (!versionsRes.ok) throw new Error('모델 버전 데이터를 가져오는데 실패했습니다.');
       const versionsData = await versionsRes.json();
       setModelVersions(versionsData.model_versions);
@@ -74,7 +88,11 @@ export default function FaceRecognitionModelPage() {
       setDeployStatus('success');
     } catch (err) {
       setDeployStatus('error');
-      setError(err.message);
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError(String(err));
+      }
     }
   };
 
@@ -197,7 +215,15 @@ export default function FaceRecognitionModelPage() {
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="name" />
                     <YAxis domain={[0.7, 1]} />
-                    <Tooltip formatter={(value) => [value.toFixed(2), '']} />
+                    <Tooltip
+                      formatter={(value) => [
+                        typeof value === 'number'
+                          ? value.toFixed(2)
+                          : Number(value).toFixed(2),
+                        '',
+                      ]}
+                    />
+
                     <Line type="monotone" dataKey="정확도" stroke="#8884d8" />
                     <Line type="monotone" dataKey="정밀도" stroke="#82ca9d" />
                     <Line type="monotone" dataKey="재현율" stroke="#ffc658" />
@@ -223,7 +249,14 @@ export default function FaceRecognitionModelPage() {
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="name" />
                     <YAxis domain={[0.7, 1]} />
-                    <Tooltip formatter={(value) => [value.toFixed(2), '정확도']} />
+                    <Tooltip
+                      formatter={(value) => [
+                        typeof value === 'number'
+                          ? value.toFixed(2)
+                          : Number(value).toFixed(2),
+                        '정확도'
+                      ]}
+                    />
                     <Bar dataKey="정확도" fill="#8884d8" />
                   </BarChart>
                 </ResponsiveContainer>

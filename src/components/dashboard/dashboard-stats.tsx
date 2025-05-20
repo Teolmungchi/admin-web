@@ -16,7 +16,7 @@ export function DashboardStats() {
     matchingChange: 0,
   });
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<null | string>(null);
 
   useEffect(() => {
     const fetchDashboardStats = async () => {

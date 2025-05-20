@@ -357,7 +357,11 @@ export default function MembersPage() {
                       </TableCell>
                       <TableCell>
                         <Badge
-                          variant={user.status === 'active' ? 'success' : 'destructive'}>{user.status === 'active' ? '활성' : '비활성'}</Badge>
+                          variant={user.status === 'active' ? 'default' : 'destructive'}
+                          className={user.status === 'active' ? "bg-green-500 text-white" : ""}
+                        >
+                          {user.status === 'active' ? '활성' : '비활성'}
+                        </Badge>
                       </TableCell>
                       <TableCell>{user.joinDate}</TableCell>
                       <TableCell>{user.lastLogin}</TableCell>
@@ -430,9 +434,13 @@ export default function MembersPage() {
                 <div>
                   <Label>로그인 상태</Label>
                   <p className="mt-1">
-                    <Badge variant={selectedUser.status === 'active' ? 'success' : 'destructive'}>
+                    <Badge
+                      variant={selectedUser.status === 'active' ? 'default' : 'destructive'}
+                      className={selectedUser.status === 'active' ? "bg-green-500 text-white" : ""}
+                    >
                       {selectedUser.status === 'active' ? '활성' : '비활성'}
                     </Badge>
+
                   </p>
                 </div>
                 <div>
