@@ -44,7 +44,11 @@ export default function FaceRecognitionModelPage() {
         setAnimalPerformanceData(animalData.animal_performance_data);
         setLightingPerformanceData(lightingData.lighting_performance_data);
       } catch (err) {
-        setError(err.message);
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError(String(err));
+        }
       }
     };
     fetchData();
