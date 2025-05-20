@@ -60,9 +60,9 @@ export const authOptions: NextAuthOptions = {
           }
 
           return {
-            id: userResponse.data.data.id,
-            email: userResponse.data.login_id,
-            name: userResponse.data.data.name,
+            id: userResponse.data.userId,
+            email: userResponse.data.email,
+            name: userResponse.data.name,
             profileImageUrl: userResponse.data.profileImageUrl,
             role: userResponse.data.role,
             accessToken,
