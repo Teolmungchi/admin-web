@@ -16,7 +16,7 @@ export default function FaceRecognitionModelPage() {
   const [animalPerformanceData, setAnimalPerformanceData] = useState([]);
   const [lightingPerformanceData, setLightingPerformanceData] = useState([]);
   const [deployStatus, setDeployStatus] = useState(null);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<null | string>(null);
 
   // 데이터 가져오기
   useEffect(() => {
