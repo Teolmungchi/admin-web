@@ -10,13 +10,19 @@ import { DateRangePicker } from '@/components/ui/date-range-picker';
 
 ChartJS.register(LineElement, BarElement, PointElement, LinearScale, CategoryScale, Tooltip, Legend, Filler);
 
+const colors = {
+  활성사용자: '#8884d8',
+  신규가입: '#82ca9d',
+  실종신고: '#ffc658',
+  발견신고: '#ff8042',
+} as const;
+
+type ChartKey = keyof typeof colors;
 type ChartData = {
   name: string;
-  활성사용자: number;
-  신규가입: number;
-  실종신고: number;
-  발견신고: number;
-};
+} & Record<ChartKey, number>;
+
+
 
 type DashboardData = {
   totalUsers: number;
@@ -108,14 +114,8 @@ export function UserActivityChart() {
     fetchActivityData();
   }, [dateRange]);
 
-  const colors = {
-    활성사용자: '#8884d8',
-    신규가입: '#82ca9d',
-    실종신고: '#ffc658',
-    발견신고: '#ff8042',
-  };
 
-  const chartData = (keys: (keyof ChartData)[]) => ({
+  const chartData = (keys: ChartKey[]) => ({
     labels: data.map((item) => item.name),
     datasets: keys.map((key) => ({
       label: key,
@@ -127,7 +127,7 @@ export function UserActivityChart() {
       pointRadius: chartType === 'line' ? 3 : 0,
       tension: chartType === 'line' ? 0.4 : 0,
     })),
-  });
+  });;
 
   const chartOptions = {
     responsive: true,

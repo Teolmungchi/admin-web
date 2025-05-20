@@ -60,13 +60,14 @@ export const authOptions: NextAuthOptions = {
           }
 
           return {
-            id: userResponse.data.userId,
+            id: String(userResponse.data.userId),
             email: userResponse.data.email,
             name: userResponse.data.name,
             profileImageUrl: userResponse.data.profileImageUrl,
             role: userResponse.data.role,
             accessToken,
           };
+
         } catch (error) {
           console.error('[Auth] Authentication error:', error);
           return null;

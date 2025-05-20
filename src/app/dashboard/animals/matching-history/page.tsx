@@ -318,9 +318,23 @@ export default function MatchingHistoryPage() {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Badge variant={match.status === 'matched' ? 'success' : match.status === 'rejected' ? 'destructive' : 'outline'}>
-                      {match.status === 'matched' ? '매칭됨' : match.status === 'rejected' ? '거부됨' : '대기중'}
+                    <Badge
+                      variant={
+                        match.status === 'rejected'
+                          ? 'destructive'
+                          : match.status === 'matched'
+                            ? 'default'
+                            : 'outline'
+                      }
+                      className={match.status === 'matched' ? "bg-green-500 text-white" : ""}
+                    >
+                      {match.status === 'matched'
+                        ? '매칭됨'
+                        : match.status === 'rejected'
+                          ? '거부됨'
+                          : '대기중'}
                     </Badge>
+
                   </TableCell>
                   <TableCell>
                     <Badge variant="outline">{match.matchType === 'auto' ? '자동' : '수동'}</Badge>
@@ -356,11 +370,16 @@ export default function MatchingHistoryPage() {
                 </div>
                 <Badge
                   variant={
-                    matchingDetails[selectedMatch].status === 'matched'
-                      ? 'success'
-                      : matchingDetails[selectedMatch].status === 'rejected'
-                        ? 'destructive'
+                    matchingDetails[selectedMatch].status === 'rejected'
+                      ? 'destructive'
+                      : matchingDetails[selectedMatch].status === 'matched'
+                        ? 'default'
                         : 'outline'
+                  }
+                  className={
+                    matchingDetails[selectedMatch].status === 'matched'
+                      ? "bg-green-500 text-white"
+                      : ""
                   }
                 >
                   {matchingDetails[selectedMatch].status === 'matched'
@@ -369,6 +388,7 @@ export default function MatchingHistoryPage() {
                       ? '거부됨'
                       : '대기중'}
                 </Badge>
+
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

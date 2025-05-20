@@ -21,6 +21,26 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Calendar, Download, Edit, Eye, Filter, MapPin, MoreHorizontal, PlusCircle, Search, Trash2, User } from 'lucide-react';
 
+interface Animal {
+  status: 'matched' | 'inactive' | 'active';
+  type: 'missing' | 'found';
+  // ...other fields
+}
+
+function getBadgeVariant(animal: Animal) {
+  if (animal.status === 'matched') return 'success';
+  if (animal.status === 'inactive') return 'destructive';
+  if (animal.type === 'missing') return 'destructive';
+  return 'default';
+}
+
+function getBadgeText(animal: Animal) {
+  if (animal.status === 'matched') return '매칭됨';
+  if (animal.status === 'inactive') return '비활성';
+  if (animal.type === 'missing') return '실종';
+  return '발견';
+}
+
 export default function AnimalsListPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState('all');
@@ -326,7 +346,7 @@ export default function AnimalsListPage() {
                     <Badge
                       variant={
                         animal.status === 'matched'
-                          ? 'success'
+                          ? 'default'       // 또는 'secondary', 원하는 스타일로
                           : animal.status === 'inactive'
                             ? 'destructive'
                             : animal.type === 'missing'
@@ -342,6 +362,7 @@ export default function AnimalsListPage() {
                             ? '실종'
                             : '발견'}
                     </Badge>
+
                   </TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>
@@ -400,14 +421,11 @@ export default function AnimalsListPage() {
                   <p className="mt-1">
                     <Badge
                       variant={
-                        selectedAnimal.status === 'matched'
-                          ? 'success'
-                          : selectedAnimal.status === 'inactive'
-                            ? 'destructive'
-                            : selectedAnimal.type === 'missing'
-                              ? 'destructive'
-                              : 'default'
+                        selectedAnimal.status === 'inactive' || selectedAnimal.type === 'missing'
+                          ? 'destructive'
+                          : 'default'
                       }
+                      className={selectedAnimal.status === 'matched' ? "bg-green-500 text-white" : ""}
                     >
                       {selectedAnimal.status === 'matched'
                         ? '매칭됨'
@@ -415,7 +433,7 @@ export default function AnimalsListPage() {
                           ? '비활성'
                           : selectedAnimal.type === 'missing'
                             ? '실종'
-                            : '보호'}
+                            : '발견'}
                     </Badge>
                   </p>
                 </div>
