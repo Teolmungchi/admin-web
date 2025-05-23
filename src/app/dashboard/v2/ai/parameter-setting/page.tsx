@@ -48,7 +48,11 @@ export default function ParameterSettings() {
 
     try {
       // 추론 파라미터 가져오기
-      const inferenceResponse = await fetch(`${API_URL}/api/parameters/inference`);
+      const inferenceResponse = await fetch(`${API_URL}/api/parameters/inference`, {
+        headers: {
+          'ngrok-skip-browser-warning': '69420',
+        },
+      });
       if (!inferenceResponse.ok) {
         throw new Error('추론 파라미터를 가져오는데 실패했습니다.');
       }
@@ -61,7 +65,11 @@ export default function ParameterSettings() {
       setImageSize(inferenceData.image_size);
 
       // 학습 파라미터 가져오기
-      const trainingResponse = await fetch(`${API_URL}/api/parameters/training`);
+      const trainingResponse = await fetch(`${API_URL}/api/parameters/training`, {
+        headers: {
+          'ngrok-skip-browser-warning': '69420',
+        },
+      });
       if (!trainingResponse.ok) {
         throw new Error('학습 파라미터를 가져오는데 실패했습니다.');
       }
@@ -96,6 +104,7 @@ export default function ParameterSettings() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'ngrok-skip-browser-warning': '69420',
         },
         body: JSON.stringify({
           similarity_threshold: similarityThreshold,
@@ -139,6 +148,7 @@ export default function ParameterSettings() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'ngrok-skip-browser-warning': '69420',
         },
         body: JSON.stringify({
           learning_rate: learningRate,

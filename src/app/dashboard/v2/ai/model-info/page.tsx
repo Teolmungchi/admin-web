@@ -50,7 +50,11 @@ export default function ModelInfo() {
 
     try {
       // 모든 모델 가져오기
-      const modelsResponse = await fetch(`${API_URL}/api/models`);
+      const modelsResponse = await fetch(`${API_URL}/api/models`, {
+        headers: {
+          'ngrok-skip-browser-warning': '69420',
+        },
+      });
       if (!modelsResponse.ok) {
         throw new Error('CLIP 모델 목록을 가져오는데 실패했습니다.');
       }
@@ -59,7 +63,11 @@ export default function ModelInfo() {
 
       // 활성 모델 가져오기
       try {
-        const activeModelResponse = await fetch(`${API_URL}/api/models/active`);
+        const activeModelResponse = await fetch(`${API_URL}/api/models/active`, {
+          headers: {
+            'ngrok-skip-browser-warning': '69420',
+          },
+        });
         if (activeModelResponse.ok) {
           const activeModelData = await activeModelResponse.json();
           setClipActiveModel(activeModelData);
@@ -88,6 +96,9 @@ export default function ModelInfo() {
     try {
       const response = await fetch(`${API_URL}/api/models/activate/${modelId}`, {
         method: 'POST',
+        headers: {
+          'ngrok-skip-browser-warning': '69420',
+        },
       });
 
       if (!response.ok) {
@@ -125,6 +136,9 @@ export default function ModelInfo() {
     try {
       const response = await fetch(`${API_URL}/api/models/${clipModelToDelete}`, {
         method: 'DELETE',
+        headers: {
+          'ngrok-skip-browser-warning': '69420',
+        },
       });
 
       if (!response.ok) {
@@ -168,7 +182,11 @@ export default function ModelInfo() {
     setFaceError(null);
 
     try {
-      const modelResponse = await fetch(`${API_URL}/api/models2`);
+      const modelResponse = await fetch(`${API_URL}/api/models2`, {
+        headers: {
+          'ngrok-skip-browser-warning': '69420',
+        },
+      });
       if (!modelResponse.ok) {
         throw new Error('얼굴인식 모델 목록을 가져오는데 실패했습니다.');
       }
@@ -176,7 +194,11 @@ export default function ModelInfo() {
       setFaceModelList(modelData);
 
       try {
-        const activeModelResponse = await fetch(`${API_URL}/api/models2/active`);
+        const activeModelResponse = await fetch(`${API_URL}/api/models2/active`, {
+          headers: {
+            'ngrok-skip-browser-warning': '69420',
+          },
+        });
         if (activeModelResponse.ok) {
           const activeModelData = await activeModelResponse.json();
           setFaceActiveModel(activeModelData);
@@ -204,6 +226,9 @@ export default function ModelInfo() {
     try {
       const response = await fetch(`${API_URL}/api/models2/activate/${modelId}`, {
         method: 'POST',
+        headers: {
+          'ngrok-skip-browser-warning': '69420',
+        },
       });
 
       if (!response.ok) {
@@ -238,6 +263,9 @@ export default function ModelInfo() {
     try {
       const response = await fetch(`${API_URL}/api/models2/${faceModelToDelete}`, {
         method: 'DELETE',
+        headers: {
+          'ngrok-skip-browser-warning': '69420',
+        },
       });
 
       if (!response.ok) {

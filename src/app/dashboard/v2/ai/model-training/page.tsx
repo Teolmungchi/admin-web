@@ -121,7 +121,11 @@ export default function ModelTraining() {
 
   const fetchModels = async () => {
     try {
-      const response = await fetch(`${API_URL}/api/models`);
+      const response = await fetch(`${API_URL}/api/models`, {
+        headers: {
+          'ngrok-skip-browser-warning': '69420',
+        },
+      });
       if (!response.ok) {
         throw new Error('모델 목록을 가져오는데 실패했습니다.');
       }
@@ -142,7 +146,11 @@ export default function ModelTraining() {
 
   const fetchJobStatus = async (jobId: string) => {
     try {
-      const response = await fetch(`${API_URL}/api/jobs/${jobId}`);
+      const response = await fetch(`${API_URL}/api/jobs/${jobId}`, {
+        headers: {
+          'ngrok-skip-browser-warning': '69420',
+        },
+      });
       if (!response.ok) {
         throw new Error('작업 상태를 가져오는데 실패했습니다.');
       }
@@ -218,11 +226,17 @@ export default function ModelTraining() {
         response = await fetch(`${API_URL}/api/train2`, {
           method: 'POST',
           body: formData,
+          headers: {
+            'ngrok-skip-browser-warning': '69420',
+          },
         });
       } else {
         response = await fetch(`${API_URL}/api/train`, {
           method: 'POST',
           body: formData,
+          headers: {
+            'ngrok-skip-browser-warning': '69420',
+          },
         });
       }
 
@@ -287,6 +301,9 @@ export default function ModelTraining() {
       const response = await fetch(`${API_URL}/api/fine-tune`, {
         method: 'POST',
         body: formData,
+        headers: {
+          'ngrok-skip-browser-warning': '69420',
+        },
       });
 
       if (!response.ok) {
@@ -346,6 +363,9 @@ export default function ModelTraining() {
       response = await fetch(`${API_URL}/api/train2`, {
         method: 'POST',
         body: formData,
+        headers: {
+          'ngrok-skip-browser-warning': '69420',
+        },
       });
 
       if (!response.ok) {
@@ -376,6 +396,9 @@ export default function ModelTraining() {
     try {
       const response = await fetch(`${API_URL}/api/jobs/${jobId}/save-model`, {
         method: 'POST',
+        headers: {
+          'ngrok-skip-browser-warning': '69420',
+        },
       });
 
       if (!response.ok) {
