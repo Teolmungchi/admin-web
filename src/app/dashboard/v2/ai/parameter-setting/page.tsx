@@ -13,7 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useToast } from '@/components/ui/use-toast';
 
-const API_URL = process.env.NEXT_PUBLIC_AI_API_URL || 'https://42f5-1-222-60-114.ngrok-free.app';
+const API_URL = process.env.NEXT_PUBLIC_AI_API_URL || 'https://khyu2.store';
 
 export default function ParameterSettings() {
   const { toast } = useToast();

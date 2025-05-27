@@ -307,9 +307,9 @@ export default function ModelInfo() {
       </div>
 
       <Tabs value={modelTypeTab} onValueChange={setModelTypeTab} className="">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-1">
           <TabsTrigger value="clip">유사도 추출 모델</TabsTrigger>
-          <TabsTrigger value="face">얼굴인식 모델</TabsTrigger>
+          {/*<TabsTrigger value="face">얼굴인식 모델</TabsTrigger>*/}
         </TabsList>
       </Tabs>
 

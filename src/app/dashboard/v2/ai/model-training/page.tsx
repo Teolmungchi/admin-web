@@ -507,10 +507,10 @@ export default function ModelTraining() {
 
       {!jobId ? (
         <Tabs defaultValue={activeTab} value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="new-training">새 유사도 추출 모델 학습</TabsTrigger>
             <TabsTrigger value="fine-tuning">기존 유사도 추출 모델 미세조정</TabsTrigger>
-            <TabsTrigger value="face-recognition">새 얼굴인식 모델 학습</TabsTrigger>
+            {/*<TabsTrigger value="face-recognition">새 얼굴인식 모델 학습</TabsTrigger>*/}
           </TabsList>
 
           <TabsContent value="new-training">
