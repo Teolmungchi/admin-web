@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useToast } from '@/components/ui/use-toast';
 
-const API_URL = process.env.NEXT_PUBLIC_AI_API_URL || 'https://khyu2.store';
+const API_URL = process.env.NEXT_PUBLIC_AI_API_URL || 'https://42f5-1-222-60-114.ngrok-free.app';
 
 export default function ModelInfo() {
   const { toast } = useToast();
@@ -307,9 +307,9 @@ export default function ModelInfo() {
       </div>
 
       <Tabs value={modelTypeTab} onValueChange={setModelTypeTab} className="">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-1">
           <TabsTrigger value="clip">유사도 추출 모델</TabsTrigger>
-          <TabsTrigger value="face">얼굴인식 모델</TabsTrigger>
+          {/*<TabsTrigger value="face">얼굴인식 모델</TabsTrigger>*/}
         </TabsList>
       </Tabs>
 

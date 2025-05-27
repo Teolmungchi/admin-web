@@ -13,7 +13,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useToast } from '@/components/ui/use-toast';
 import { useRouter } from 'next/navigation';
 
-const API_URL = process.env.NEXT_PUBLIC_AI_API_URL || 'https://khyu2.store';
+const API_URL = process.env.NEXT_PUBLIC_AI_API_URL || 'https://42f5-1-222-60-114.ngrok-free.app';
 
 // localStorage 키 상수
 const STORAGE_KEY_JOB_ID = 'pet_finder_current_job_id';
@@ -507,10 +507,10 @@ export default function ModelTraining() {
 
       {!jobId ? (
         <Tabs defaultValue={activeTab} value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="new-training">새 유사도 추출 모델 학습</TabsTrigger>
             <TabsTrigger value="fine-tuning">기존 유사도 추출 모델 미세조정</TabsTrigger>
-            <TabsTrigger value="face-recognition">새 얼굴인식 모델 학습</TabsTrigger>
+            {/*<TabsTrigger value="face-recognition">새 얼굴인식 모델 학습</TabsTrigger>*/}
           </TabsList>
 
           <TabsContent value="new-training">
