@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useToast } from '@/components/ui/use-toast';
 
-const API_URL = process.env.NEXT_PUBLIC_AI_API_URL || 'https://c70d-125-133-62-199.ngrok-free.app';
+const API_URL = process.env.NEXT_PUBLIC_AI_API_URL || 'https://beae-210-119-237-101.ngrok-free.app';
 
 export default function ModelInfo() {
   const { toast } = useToast();
