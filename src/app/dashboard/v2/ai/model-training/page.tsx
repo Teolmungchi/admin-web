@@ -13,7 +13,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useToast } from '@/components/ui/use-toast';
 import { useRouter } from 'next/navigation';
 
-const API_URL = process.env.NEXT_PUBLIC_AI_API_URL || 'https://beae-210-119-237-101.ngrok-free.app';
+const API_URL = process.env.NEXT_PUBLIC_AI_API_URL || 'https://a730-210-119-237-102.ngrok-free.app';
 
 // localStorage 키 상수
 const STORAGE_KEY_JOB_ID = 'pet_finder_current_job_id';
